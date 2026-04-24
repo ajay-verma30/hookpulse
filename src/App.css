@@ -1,0 +1,13 @@
+.recent-hits-list::-webkit-scrollbar {
+    width: 4px;
+}
+.recent-hits-list::-webkit-scrollbar-thumb {
+    background: #e0e0e0;
+    border-radius: 10px;
+}
+.last-child-border-0:last-child {
+    border-bottom: 0 !important;
+}
+.recharts-responsive-container{
+    height: 95% !important; 
+}
