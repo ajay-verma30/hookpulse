@@ -11,3 +11,9 @@
 .recharts-responsive-container{
     height: 95% !important; 
 }
+
+.active-link {
+  background-color: #1e293b !important;
+  color: #fff !important;
+  border-radius: 8px;
+}

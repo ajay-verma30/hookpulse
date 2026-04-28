@@ -20,7 +20,7 @@ const AnalyticsChart = ({ data }) => {
   }));
 
   return (
-    <div style={{ width: '100%', height: 350, backgroundColor: '#fff', padding: '20px', borderRadius: '8px' }} className="shadow-sm border">
+    <div style={{ width: '100%', height: 300, backgroundColor: '#fff', padding: '20px', borderRadius: '8px' }} className="shadow-sm border">
       <h6 className="fw-bold mb-4">Transaction Trends</h6>
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={formattedData}>

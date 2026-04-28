@@ -8,6 +8,7 @@ import Dashboard from './Pages/Dashboard';
 import PrivateRoute from './Middleware/PrivateRoute';
 import PublicRoute from './Middleware/PublicRoute';
 import WebhookDetails from './Pages/WebhookDetails';
+import NotificationSettings from './Pages/NotificationSettings';
 
 function App() {
   return (
@@ -47,6 +48,14 @@ function App() {
           element={
             <PrivateRoute>
               <WebhookDetails />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/communications/config"
+          element={
+            <PrivateRoute>
+              <NotificationSettings />
             </PrivateRoute>
           }
         />

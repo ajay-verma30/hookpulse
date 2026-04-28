@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Container,
@@ -11,39 +11,17 @@ import {
   Alert,
   Stack,
 } from "react-bootstrap";
+import { 
+  ArrowLeft, 
+  Copy, 
+  Check, 
+  RefreshCcw, 
+  Info, 
+  AlertTriangle,
+  Code
+} from "lucide-react"; 
 import { useAuth } from "../Middleware/AuthContext";
 import TopNavbar from "../Components/TopNavbar";
-
-// --- Configuration Constants ---
-const REPLAY_POLICIES = {
-  SAFE: {
-    events: ["payment_intent.payment_failed", "payment_intent.succeeded", "invoice.payment_failed", "invoice.paid"],
-    label: "Safe to Replay",
-    variant: "success",
-    color: "#198754"
-  },
-  CAUTION: {
-    events: ["charge.failed", "payment_intent.created"],
-    label: "Use with Caution",
-    variant: "warning",
-    color: "#ffc107"
-  },
-  DANGEROUS: {
-    events: ["charge.succeeded", "checkout.session.completed"],
-    label: "Not Recommended",
-    variant: "danger",
-    color: "#dc3545"
-  }
-};
-
-const JSON_THEME = {
-  backgroundColor: "#1e1e1e",
-  color: "#9cdcfe",
-  maxHeight: "500px",
-  overflow: "auto",
-  fontSize: "0.875rem",
-  borderRadius: "0 0 8px 8px"
-};
 
 function WebhookDetails() {
   const { webhook_id } = useParams();
@@ -56,12 +34,13 @@ function WebhookDetails() {
   const [replayResult, setReplayResult] = useState(null);
   const [copied, setCopied] = useState(false);
 
-  // --- Logic ---
-  const getSafetyConfig = useCallback((eventType) => {
-    if (REPLAY_POLICIES.SAFE.events.includes(eventType)) return REPLAY_POLICIES.SAFE;
-    if (REPLAY_POLICIES.CAUTION.events.includes(eventType)) return REPLAY_POLICIES.CAUTION;
-    if (REPLAY_POLICIES.DANGEROUS.events.includes(eventType)) return REPLAY_POLICIES.DANGEROUS;
-    return { label: "Unknown Risk", variant: "secondary", color: "#6c757d" };
+  const getFailureType = useCallback((log) => {
+    const payload = log?.payload?.data?.object;
+    if (payload?.last_payment_error) return "USER_FAILURE";
+    if (log.status === "FAILED" && (log.http_status_code >= 500 || log.error_stack || log.last_error_message === "timeout")) {
+      return "SYSTEM_FAILURE";
+    }
+    return "UNKNOWN";
   }, []);
 
   useEffect(() => {
@@ -97,150 +76,186 @@ function WebhookDetails() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // --- Render Helpers ---
-  if (loading) return (
-    <div className="d-flex justify-content-center align-items-center vh-100">
-      <Spinner animation="grow" variant="primary" />
-    </div>
-  );
+  if (loading) {
+    return (
+      <div className="d-flex flex-column justify-content-center align-items-center vh-100 bg-white">
+        <Spinner animation="border" variant="primary" />
+        <p className="mt-3 text-muted fw-medium">Loading event data...</p>
+      </div>
+    );
+  }
 
-  if (!log) return (
-    <Container className="mt-5 text-center">
-      <Alert variant="danger">Webhook log not found or access denied.</Alert>
-      <Button variant="outline-primary" onClick={() => navigate("/dashboard")}>Return to Dashboard</Button>
-    </Container>
-  );
+  if (!log) {
+    return (
+      <Container className="mt-5 text-center">
+        <Alert variant="danger" className="border-0 shadow-sm">Webhook log not found.</Alert>
+        <Button variant="outline-primary" onClick={() => navigate("/dashboard")}>
+          Back to Dashboard
+        </Button>
+      </Container>
+    );
+  }
 
-  const safety = getSafetyConfig(log.event_type);
+  const failureType = getFailureType(log);
+  const canReplay = failureType === "SYSTEM_FAILURE";
 
   return (
-    <div className="bg-light min-vh-100">
+    <div style={{ backgroundColor: "#f8f9fc", minHeight: "100vh" }}>
       <TopNavbar />
-      <Container className="py-4">
-        {/* Navigation */}
-        <Button 
-          variant="link" 
-          onClick={() => navigate(-1)} 
-          className="p-0 mb-4 text-decoration-none text-secondary small"
+
+      <Container className="py-5">
+        {/* 🔙 Navigation */}
+        <Button
+          variant="link"
+          onClick={() => navigate(-1)}
+          className="mb-4 text-decoration-none text-muted p-0 d-flex align-items-center"
         >
-          &larr; Back to Activity Logs
+          <ArrowLeft size={16} className="me-2" />
+          Back to logs
         </Button>
 
-        {/* Header Section */}
-        <header className="d-flex flex-wrap justify-content-between align-items-end mb-4 gap-3">
+        {/* 🧾 Header Section */}
+        <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
           <div>
             <div className="d-flex align-items-center gap-2 mb-1">
-              <h2 className="h3 fw-bold mb-0">{log.event_type}</h2>
+              <h3 className="fw-bold m-0 text-dark" style={{ letterSpacing: "-0.5px" }}>
+                {log.event_type}
+              </h3>
               <Badge pill bg={log.status === "SUCCESS" ? "success" : "danger"} className="px-3">
                 {log.status}
               </Badge>
             </div>
-            <p className="text-muted font-monospace small mb-2">Event ID: {log.provider_event_id}</p>
-            <div className="d-flex align-items-center gap-2">
-               <span style={{ color: safety.color }}>●</span>
-               <span className="text-uppercase fw-bold small text-muted" style={{ letterSpacing: '0.5px' }}>
-                {safety.label}
-               </span>
-            </div>
+            <p className="text-muted font-monospace small mb-0">ID: {log.provider_event_id}</p>
           </div>
 
           <Stack direction="horizontal" gap={3}>
-            <Button
-              variant="primary"
-              className="px-4 shadow-sm"
-              onClick={handleReplay}
-              disabled={replaying || safety.variant === "danger"}
+            <Badge 
+               bg="white" 
+               className={`border ${failureType === 'SYSTEM_FAILURE' ? 'text-warning border-warning' : 'text-primary border-primary'} px-3 py-2`}
             >
-              {replaying ? <><Spinner size="sm" className="me-2" />Replaying...</> : "Replay Webhook"}
+              {failureType.replace("_", " ")}
+            </Badge>
+            <Button
+              variant={canReplay ? "primary" : "light"}
+              className="shadow-sm px-4 fw-semibold"
+              onClick={handleReplay}
+              disabled={replaying || !canReplay}
+            >
+              {replaying ? (
+                <><Spinner size="sm" className="me-2" /> Replaying...</>
+              ) : (
+                <><RefreshCcw size={16} className="me-2" /> Replay Event</>
+              )}
             </Button>
           </Stack>
-        </header>
+        </div>
 
-        {replayResult && (
-          <Alert variant={replayResult.status === "SUCCESS" ? "success" : "danger"} className="border-0 shadow-sm mb-4">
-            {replayResult.status === "SUCCESS" ? "Successfully re-dispatched webhook." : "Failed to replay webhook. Check server logs."}
-            {replayResult.latency && <span className="ms-2 opacity-75">({replayResult.latency}ms)</span>}
+        {/* 💬 Smart Guidance Cards */}
+        {failureType === "USER_FAILURE" && (
+          <Alert variant="info" className="border-0 shadow-sm d-flex align-items-center">
+            <Info size={20} className="me-3" />
+            <div>
+              <strong>Payment Decline:</strong> This was triggered by the customer's bank. Manual replay will likely yield the same result.
+            </div>
           </Alert>
         )}
 
-        <Row>
-          {/* Metadata Sidebar */}
+        {failureType === "SYSTEM_FAILURE" && (
+          <Alert variant="warning" className="border-0 shadow-sm d-flex align-items-center">
+            <AlertTriangle size={20} className="me-3" />
+            <div>
+              <strong>System Error:</strong> Connection timeout or internal error detected. Replay is recommended.
+            </div>
+          </Alert>
+        )}
+
+        {/* 🔁 Replay Toast-style Alert */}
+        {replayResult && (
+          <Alert
+            variant={replayResult.status === "SUCCESS" ? "success" : "danger"}
+            className="border-0 shadow-sm animate__animated animate__fadeIn"
+          >
+            {replayResult.status === "SUCCESS" 
+              ? `✅ Success: Event replayed in ${replayResult.latency}ms` 
+              : "❌ Error: Replay attempt failed."}
+          </Alert>
+        )}
+
+        <Row className="mt-4">
+          {/* 📊 Metadata Sidebar */}
           <Col lg={4}>
             <Card className="border-0 shadow-sm mb-4">
+              <Card.Header className="bg-white border-0 pt-4 pb-0">
+                <h6 className="text-uppercase text-muted fw-bold small mb-0">Event Details</h6>
+              </Card.Header>
               <Card.Body>
-                <h6 className="text-muted fw-bold mb-4 small text-uppercase">Technical Metadata</h6>
                 <div className="mb-3">
-                  <label className="text-muted d-block small mb-1">Gateway</label>
-                  <span className="fw-semibold">{log.gateway_name || "System Default"}</span>
+                  <label className="text-muted small d-block">Gateway</label>
+                  <span className="fw-medium text-dark">{log.gateway_name || "N/A"}</span>
                 </div>
                 <div className="mb-3">
-                  <label className="text-muted d-block small mb-1">Received Time</label>
-                  <span className="fw-semibold">{new Date(log.received_at).toLocaleString()}</span>
+                  <label className="text-muted small d-block">Received At</label>
+                  <span className="fw-medium text-dark">{new Date(log.received_at).toLocaleString()}</span>
                 </div>
                 <div className="mb-3">
-                  <label className="text-muted d-block small mb-1">HTTP Status</label>
-                  <Badge bg="light" text="dark" className="border">{log.http_status_code || 200} OK</Badge>
+                  <label className="text-muted small d-block">HTTP Status</label>
+                  <span className={`fw-bold ${log.http_status_code >= 400 ? 'text-danger' : 'text-success'}`}>
+                    {log.http_status_code || 200}
+                  </span>
                 </div>
                 <div>
-                  <label className="text-muted d-block small mb-1">Processing Latency</label>
-                  <span className="fw-semibold">{log.latency_ms || 0} ms</span>
+                  <label className="text-muted small d-block">Latency</label>
+                  <span className="fw-medium text-dark">{log.latency_ms || 0} ms</span>
                 </div>
               </Card.Body>
             </Card>
 
             {log.last_error_message && (
-              <Card className="border-0 shadow-sm border-start border-danger border-4">
+              <Card className="border-0 shadow-sm bg-danger text-white">
                 <Card.Body>
-                  <h6 className="text-danger fw-bold small text-uppercase mb-2">Error Stack</h6>
-                  <code className="text-dark small d-block" style={{ wordBreak: 'break-all' }}>
-                    {log.last_error_message}
-                  </code>
+                  <div className="d-flex align-items-center mb-2">
+                    <AlertTriangle size={18} className="me-2" />
+                    <span className="fw-bold">Error Log</span>
+                  </div>
+                  <p className="small mb-0 opacity-90">{log.last_error_message}</p>
                 </Card.Body>
               </Card>
             )}
           </Col>
 
-          {/* Main Content Area */}
+          {/* 📦 Payload Viewer */}
           <Col lg={8}>
-            {/* RCA Section */}
-            {log.status !== "SUCCESS" && (
-              <Card className="border-0 shadow-sm mb-4 overflow-hidden">
-                <Card.Header className="bg-danger text-white border-0 py-3">
-                   <h6 className="mb-0 fw-bold">Root Cause Analysis</h6>
-                </Card.Header>
-                <Card.Body className="bg-white">
-                  <Row className="mb-4">
-                    <Col sm={6}>
-                      <p className="text-muted small fw-bold text-uppercase mb-1">Issue Category</p>
-                      <Badge bg="secondary" className="text-uppercase">{log.issue_category || "Uncategorized"}</Badge>
-                    </Col>
-                    <Col sm={6}>
-                      <p className="text-muted small fw-bold text-uppercase mb-1">Severity Score</p>
-                      <span className={`fw-bold ${log.rca_severity === 'CRITICAL' ? 'text-danger' : 'text-warning'}`}>
-                        {log.rca_severity || "NORMAL"}
-                      </span>
-                    </Col>
-                  </Row>
-                  <div className="p-3 rounded bg-light border">
-                    <p className="text-muted small fw-bold text-uppercase mb-2">Recommended Action</p>
-                    <p className="mb-0 text-dark">{log.suggested_fix || "No specific fix identified. Manual inspection required."}</p>
-                  </div>
-                </Card.Body>
-              </Card>
-            )}
-
-            {/* Payload Section */}
             <Card className="border-0 shadow-sm overflow-hidden">
-              <Card.Header className="bg-white py-3 d-flex justify-content-between align-items-center">
-                <h6 className="mb-0 fw-bold text-muted small text-uppercase">Payload Data</h6>
-                <Button size="sm" variant="outline-secondary" onClick={copyToClipboard} style={{ fontSize: '12px' }}>
-                  {copied ? "Copied!" : "Copy JSON"}
+              <Card.Header className="bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                <div className="d-flex align-items-center text-muted">
+                  <Code size={18} className="me-2" />
+                  <span className="fw-bold small text-uppercase">Payload Body</span>
+                </div>
+                <Button 
+                  variant={copied ? "success" : "outline-secondary"} 
+                  size="sm" 
+                  onClick={copyToClipboard}
+                  className="d-flex align-items-center transition-all"
+                >
+                  {copied ? <Check size={14} className="me-1" /> : <Copy size={14} className="me-1" />}
+                  {copied ? "Copied" : "Copy JSON"}
                 </Button>
               </Card.Header>
               <Card.Body className="p-0">
-                <pre className="p-4 m-0" style={JSON_THEME}>
-                  {JSON.stringify(log.payload, null, 2)}
-                </pre>
+                <div 
+                  className="bg-dark p-4" 
+                  style={{ 
+                    maxHeight: "600px", 
+                    overflowY: "auto",
+                    backgroundColor: "#1e1e26 !important" 
+                  }}
+                >
+                  <pre className="m-0" style={{ fontSize: "0.875rem", lineHeight: "1.6" }}>
+                    <code className="text-info">
+                      {JSON.stringify(log.payload, null, 2)}
+                    </code>
+                  </pre>
+                </div>
               </Card.Body>
             </Card>
           </Col>
