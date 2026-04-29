@@ -3,7 +3,7 @@ import { io } from "socket.io-client";
 import { useNavigate } from "react-router-dom";
 import {
   Container, Form, Row, Col, Spinner, Badge,
-  ButtonGroup, Button, Card, Modal,
+  ButtonGroup, Button, Card, Modal, Alert
 } from "react-bootstrap";
 import { useAuth } from "../Middleware/AuthContext";
 import TopNavbar from "../Components/TopNavbar";
@@ -572,7 +572,7 @@ function Dashboard() {
   const [analytics, setAnalytics] = useState(null);
   const [isFetching, setIsFetching] = useState(false);
   const [isLivePulse, setIsLivePulse] = useState(false);
-  const [filter, setFilter] = useState("24h");
+  const [filter, setFilter] = useState("1h");
 
   const [showModal, setShowModal] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -684,7 +684,7 @@ function Dashboard() {
           {/* Main */}
           <div className="flex-grow-1 pb-5 position-relative" style={{ minWidth: 0 }}>
             {showEmptyState && (
-              <div className="empty-overlay">
+              <div className="empty-overlay" style={{marginTop:"-600px"}}>
                 <div className="empty-card">
                   <div className="empty-icon"><Zap size={26} /></div>
                   <h5 style={{ fontWeight: 800, marginBottom: 8 }}>No Gateway Connected</h5>
@@ -729,7 +729,9 @@ function Dashboard() {
                   <button className="add-gw-btn" onClick={() => setShowModal(true)}>+ Add Gateway</button>
                 </div>
               </div>
-
+<Alert variant="info" className="mb-3">
+  🚀 We’re in beta — your account is free during early access.
+</Alert>
               {/* ── Hero Recovery Banner ── */}
               {analytics && (
                 <div className="hero-banner fade-up mb-4">
@@ -869,14 +871,14 @@ function Dashboard() {
                       {/* Activity Feed */}
                       <div className="panel fade-up stagger-4" style={{ height: "100%" }}>
                         <div className="panel-header">
-                          <div className="panel-title">Recent Activity</div>
+                          <div className="panel-title">Last 10 Activities</div>
                           <Activity size={14} color="var(--text-2)" />
                         </div>
                         <div style={{ overflowY: "auto", maxHeight: 600 }}>
                           {(analytics.recent_hits ?? []).map((hit, i) => {
                             const isFailed = hit.status !== "SUCCESS";
                             return (
-                              <div className="activity-item" key={i} onClick={() => navigate(`/log_details/${hit.id}`)}>
+                              <div className="activity-item" key={i} onClick={() => navigate(`/log_details/${hit.id}?gateway=${selectedGateway}`)}>
                                 <span className="activity-dot" style={{ background: isFailed ? "var(--red)" : "var(--green)" }} />
                                 <div style={{ flex: 1, minWidth: 0 }}>
                                   <div style={{ fontSize: "0.82rem", fontWeight: 600, color: "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>

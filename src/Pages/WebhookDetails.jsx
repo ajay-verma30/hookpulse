@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import {
   Container,
   Card,
@@ -22,17 +22,41 @@ import {
 } from "lucide-react"; 
 import { useAuth } from "../Middleware/AuthContext";
 import TopNavbar from "../Components/TopNavbar";
+import Sidebar from "../Components/Sidebar";
 
 function WebhookDetails() {
   const { webhook_id } = useParams();
   const { API } = useAuth();
   const navigate = useNavigate();
 
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const gatewayIdFromUrl = queryParams.get("gateway");
+
   const [log, setLog] = useState(null);
   const [loading, setLoading] = useState(true);
   const [replaying, setReplaying] = useState(false);
   const [replayResult, setReplayResult] = useState(null);
   const [copied, setCopied] = useState(false);
+
+  const [gateways, setGateways] = useState([]); // Gateways store karne ke liye
+
+  // 2. Gateway ka naam dhoondhne ke liye useEffect
+  useEffect(() => {
+    const fetchGateways = async () => {
+      try {
+        const res = await API.get("/gateways");
+        const data = res.data.gateways || res.data;
+        setGateways(data);
+      } catch (err) {
+        console.error("Error fetching gateways:", err);
+      }
+    };
+    fetchGateways();
+  }, [API]);
+
+  const selectedGatewayObj = gateways.find(g => g.id === gatewayIdFromUrl);
+  const gatewayDisplayName = selectedGatewayObj ? selectedGatewayObj.name : (log?.gateway_name || "N/A");
 
   const getFailureType = useCallback((log) => {
     const payload = log?.payload?.data?.object;
@@ -103,7 +127,12 @@ function WebhookDetails() {
     <div style={{ backgroundColor: "#f8f9fc", minHeight: "100vh" }}>
       <TopNavbar />
 
-      <Container className="py-5">
+<Row>
+  <Col md={2}>
+    <Sidebar/>
+  </Col>
+  <Col md={10}>
+          <Container className="py-5">
         {/* 🔙 Navigation */}
         <Button
           variant="link"
@@ -191,7 +220,7 @@ function WebhookDetails() {
               <Card.Body>
                 <div className="mb-3">
                   <label className="text-muted small d-block">Gateway</label>
-                  <span className="fw-medium text-dark">{log.gateway_name || "N/A"}</span>
+                  <span className="fw-medium text-dark">{gatewayDisplayName}</span>
                 </div>
                 <div className="mb-3">
                   <label className="text-muted small d-block">Received At</label>
@@ -261,6 +290,8 @@ function WebhookDetails() {
           </Col>
         </Row>
       </Container>
+  </Col>
+</Row>
     </div>
   );
 }

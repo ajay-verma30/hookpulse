@@ -9,6 +9,9 @@ import PrivateRoute from './Middleware/PrivateRoute';
 import PublicRoute from './Middleware/PublicRoute';
 import WebhookDetails from './Pages/WebhookDetails';
 import NotificationSettings from './Pages/NotificationSettings';
+import LandingPage from './Pages/LandingPage';
+import PricingPage from './Pages/PricingPage';
+import Documentation from './Pages/Documentation';
 
 function App() {
   return (
@@ -16,6 +19,30 @@ function App() {
       <Routes>
 
         {/* Public routes */}
+        <Route
+          path="/"
+          element={
+            <PublicRoute>
+              <LandingPage />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/docs"
+          element={
+            <PublicRoute>
+              <Documentation />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/pricing"
+          element={
+            <PublicRoute>
+              <PricingPage />
+            </PublicRoute>
+          }
+        />
         <Route
           path="/register"
           element={
