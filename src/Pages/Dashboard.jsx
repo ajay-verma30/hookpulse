@@ -678,7 +678,11 @@ function Dashboard() {
         <div className="d-flex">
           {/* Sidebar */}
           <div style={{ width: "240px", minHeight: "calc(100vh - 60px)", flexShrink: 0 }}>
-            <Sidebar selectedGateway={selectedGateway} />
+            <Sidebar 
+  selectedGateway={selectedGateway} 
+  gateways={gateways} 
+  onSelectGateway={(id) => setSelectedGateway(id)} 
+/>
           </div>
 
           {/* Main */}
@@ -702,7 +706,7 @@ function Dashboard() {
 
               {/* ── Top bar ── */}
               <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-                <div className="d-flex align-items-center gap-3">
+                {/* <div className="d-flex align-items-center gap-3">
                   <Form.Select
                     className="gw-selector"
                     value={selectedGateway}
@@ -717,7 +721,7 @@ function Dashboard() {
                     <span className="status-dot" />
                     {isLivePulse ? "Syncing…" : analytics?.is_active ? "Recovery Active" : "Offline"}
                   </div>
-                </div>
+                </div> */}
                 <div className="d-flex gap-2 align-items-center">
                   <div className="filter-group">
                     {["1h","24h","7d","30d"].map(t => (

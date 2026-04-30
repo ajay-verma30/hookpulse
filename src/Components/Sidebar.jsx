@@ -1,17 +1,18 @@
 import React from "react";
 import { Nav } from "react-bootstrap";
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, BellRing } from "lucide-react";
+import { LayoutDashboard, BellRing, Globe } from "lucide-react";
 
-const Sidebar = ({ selectedGateway }) => {
+const Sidebar = ({ selectedGateway, gateways, onSelectGateway }) => {
   return (
     <div style={styles.sidebar}>
-      <div style={styles.logoContainer}>
-        <div style={styles.logoIcon}>H</div>
-        <h4 style={styles.logoText}>HookPulse <span style={styles.logoBadge}>RCA</span></h4>
+      {/* Logo Section (Optional but recommended) */}
+      <div style={{ padding: "0 12px 20px 12px", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+        <h4 style={{ color: "#fff", fontSize: "1.2rem", fontWeight: "bold" }}>HookPulse</h4>
       </div>
 
       <Nav className="flex-column" style={styles.navLinks}>
+        <div style={styles.sectionLabel}>Overview</div>
         <NavLink
           to="/dashboard"
           style={({ isActive }) => ({
@@ -19,10 +20,29 @@ const Sidebar = ({ selectedGateway }) => {
             ...(isActive ? styles.activeLink : {}),
           })}
         >
-          <LayoutDashboard size={20} style={styles.icon} />
-          Dashboard
+          <LayoutDashboard size={18} style={styles.icon} />
+          Main Dashboard
         </NavLink>
 
+        <div style={styles.sectionLabel}>Your Gateways</div>
+        <div style={styles.gatewayList}>
+          {gateways.map((gw) => (
+            <div
+              key={gw.id}
+              onClick={() => onSelectGateway(gw.id)}
+              style={{
+                ...styles.gatewayItem,
+                ...(selectedGateway === gw.id ? styles.activeGateway : {}),
+              }}
+            >
+              <Globe size={14} style={styles.icon} />
+              <span style={styles.gatewayName}>{gw.name}</span>
+              {selectedGateway === gw.id && <div style={styles.activeIndicator} />}
+            </div>
+          ))}
+        </div>
+
+        <div style={styles.divider} />
         <NavLink
           to="/communications/config"
           state={{ gatewayId: selectedGateway }}
@@ -31,7 +51,7 @@ const Sidebar = ({ selectedGateway }) => {
             ...(isActive ? styles.activeLink : {}),
           })}
         >
-          <BellRing size={20} style={styles.icon} />
+          <BellRing size={18} style={styles.icon} />
           Communications
         </NavLink>
       </Nav>
@@ -43,66 +63,83 @@ const styles = {
   sidebar: {
     height: "100vh",
     width: "260px",
+    backgroundColor: "#0f172a",
+    padding: "24px 12px",
+    color: "#cbd5e1",
+    display: "flex",
+    flexDirection: "column",
+    // Sticky/Fixed Logic
     position: "fixed",
     top: 0,
     left: 0,
-    backgroundColor: "#0f172a", // Dark navy jo image mein hai
-    padding: "24px 16px",
-    color: "#fff",
+    zIndex: 1000,
+    overflowY: "auto", // List badi hone par sidebar scroll hoga
     borderRight: "1px solid rgba(255, 255, 255, 0.05)",
+  },
+  sectionLabel: {
+    fontSize: "0.65rem",
+    textTransform: "uppercase",
+    color: "#64748b",
+    fontWeight: "700",
+    padding: "20px 12px 8px 12px",
+    letterSpacing: "0.05em",
+  },
+  gatewayList: {
     display: "flex",
     flexDirection: "column",
+    gap: "4px",
   },
-  logoContainer: {
+  gatewayItem: {
     display: "flex",
     alignItems: "center",
-    gap: "12px",
-    marginBottom: "40px",
-    paddingLeft: "8px",
-  },
-  logoIcon: {
-    backgroundColor: "#3b82f6", // Blue accent
-    width: "32px",
-    height: "32px",
+    padding: "10px 12px",
     borderRadius: "8px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontWeight: "bold",
-    fontSize: "18px",
+    cursor: "pointer",
+    fontSize: "0.9rem",
+    transition: "all 0.2s ease",
+    position: "relative",
+    color: "#94a3b8",
   },
-  logoText: {
-    margin: 0,
-    fontSize: "1.2rem",
-    fontWeight: "700",
-    letterSpacing: "-0.5px",
+  activeGateway: {
+    backgroundColor: "rgba(56, 189, 248, 0.1)",
+    color: "#38bdf8",
+    fontWeight: "500",
   },
-  logoBadge: {
-    fontSize: "0.8rem",
-    color: "#3b82f6",
-    fontWeight: "600",
+  activeIndicator: {
+    position: "absolute",
+    left: "-4px",
+    height: "20px",
+    width: "3px",
+    backgroundColor: "#38bdf8",
+    borderRadius: "0 4px 4px 0",
   },
-  navLinks: {
-    gap: "8px",
+  gatewayName: {
+    marginLeft: "10px",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
   },
   link: {
     display: "flex",
     alignItems: "center",
-    padding: "12px 16px",
-    color: "#94a3b8", // Muted slate color
+    padding: "12px",
+    borderRadius: "8px",
     textDecoration: "none",
-    borderRadius: "10px",
-    fontSize: "0.95rem",
-    fontWeight: "500",
-    transition: "all 0.2s ease",
+    color: "#94a3b8",
+    fontSize: "0.9rem",
   },
   activeLink: {
-    backgroundColor: "rgba(59, 130, 246, 0.1)", // Light blue tint
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
     color: "#fff",
   },
   icon: {
-    marginRight: "12px",
+    minWidth: "20px",
   },
+  divider: {
+    height: "1px",
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    margin: "15px 12px",
+  }
 };
 
 export default Sidebar;
