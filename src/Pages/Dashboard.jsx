@@ -929,9 +929,9 @@ function Dashboard() {
                   <label className="form-label">Provider</label>
                   <select className="form-select"
                     onChange={(e) => setFormData({ ...formData, provider_type: e.target.value })}>
-                    <option value="stripe">Stripe</option>
-                    <option value="adyen">Adyen</option>
-                    <option value="paypal">PayPal</option>
+                    <option value="STRIPE">Stripe</option>
+                    <option value="ADYEN">Adyen</option>
+                    <option value="PAYPAL">PayPal</option>
                   </select>
                 </div>
                 <div className="mb-4">
