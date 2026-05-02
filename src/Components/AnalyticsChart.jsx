@@ -1,7 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, Cell, PieChart, Pie, Legend,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+  PieChart,
+  Pie,
+  Legend,
 } from "recharts";
 
 /* ─────────────────────────────────────────────
@@ -199,10 +208,10 @@ const CHART_STYLES = `
 /* ─────────────────────────────────────────────
    CONSTANTS
 ───────────────────────────────────────────── */
-const GREEN  = "var(--green,  #00A86B)";
-const RED    = "var(--red,    #E53E5A)";
-const BLUE   = "var(--blue,   #2B7FE0)";
-const AMBER  = "var(--amber,  #D97706)";
+const GREEN = "var(--green,  #00A86B)";
+const RED = "var(--red,    #E53E5A)";
+const BLUE = "var(--blue,   #2B7FE0)";
+const AMBER = "var(--amber,  #D97706)";
 const PURPLE = "var(--purple, #7C5FD4)";
 
 const ERROR_COLORS = [RED, AMBER, BLUE, PURPLE, "#F59E0B", "#6366F1"];
@@ -223,8 +232,11 @@ function ChartTooltip({ active, payload, label }) {
             <span className="ac-tooltip-dot" style={{ background: p.color }} />
             {p.name}
           </span>
-          <span>{typeof p.value === "number" && p.value > 999
-            ? `$${p.value.toLocaleString()}` : p.value}</span>
+          <span>
+            {typeof p.value === "number" && p.value > 999
+              ? `$${p.value.toLocaleString()}`
+              : p.value}
+          </span>
         </div>
       ))}
     </div>
@@ -235,41 +247,77 @@ function ChartTooltip({ active, payload, label }) {
    TAB 1 — AREA CHART (Traffic Flow)
 ───────────────────────────────────────────── */
 function TrafficAreaChart({ data = [] }) {
-  if (!data.length) return <div className="ac-empty">No traffic data available</div>;
+  if (!data.length)
+    return <div className="ac-empty">No traffic data available</div>;
 
   return (
     <ResponsiveContainer width="100%" height={260}>
-      <AreaChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+      <AreaChart
+        data={data}
+        margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
+      >
         <defs>
           <linearGradient id="gradGreen" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%"  stopColor="#00A86B" stopOpacity={0.18} />
+            <stop offset="5%" stopColor="#00A86B" stopOpacity={0.18} />
             <stop offset="95%" stopColor="#00A86B" stopOpacity={0} />
           </linearGradient>
           <linearGradient id="gradRed" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%"  stopColor="#E53E5A" stopOpacity={0.15} />
+            <stop offset="5%" stopColor="#E53E5A" stopOpacity={0.15} />
             <stop offset="95%" stopColor="#E53E5A" stopOpacity={0} />
           </linearGradient>
+          {/* ── ADD THIS ── */}
+          <linearGradient id="gradAmber" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="#D97706" stopOpacity={0.15} />
+            <stop offset="95%" stopColor="#D97706" stopOpacity={0} />
+          </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="var(--border, #DDE1EC)" vertical={false} />
+        <CartesianGrid
+          strokeDasharray="3 3"
+          stroke="var(--border, #DDE1EC)"
+          vertical={false}
+        />
         <XAxis
           dataKey="label"
           tick={{ fontSize: 11, fill: "var(--text-3, #9AA3B8)", fontFamily: "var(--mono)" }}
-          axisLine={false} tickLine={false}
+          axisLine={false}
+          tickLine={false}
         />
         <YAxis
           tick={{ fontSize: 11, fill: "var(--text-3, #9AA3B8)", fontFamily: "var(--mono)" }}
-          axisLine={false} tickLine={false}
+          axisLine={false}
+          tickLine={false}
         />
         <Tooltip content={<ChartTooltip />} />
         <Area
-          type="monotone" dataKey="recovered" name="Recovered"
-          stroke="#00A86B" strokeWidth={2.5}
-          fill="url(#gradGreen)" dot={false} activeDot={{ r: 5, fill: "#00A86B" }}
+          type="monotone"
+          dataKey="success"
+          name="Success"
+          stroke="#00A86B"
+          strokeWidth={2.5}
+          fill="url(#gradGreen)"
+          dot={false}
+          activeDot={{ r: 5, fill: "#00A86B" }}
         />
         <Area
-          type="monotone" dataKey="failed" name="Failed"
-          stroke="#E53E5A" strokeWidth={2}
-          fill="url(#gradRed)" dot={false} activeDot={{ r: 5, fill: "#E53E5A" }}
+          type="monotone"
+          dataKey="failed"
+          name="Failed"
+          stroke="#E53E5A"
+          strokeWidth={2}
+          fill="url(#gradRed)"
+          dot={false}
+          activeDot={{ r: 5, fill: "#E53E5A" }}
+        />
+        {/* ── ADD THIS ── */}
+        <Area
+          type="monotone"
+          dataKey="recovered"
+          name="Recovered"
+          stroke="#D97706"
+          strokeWidth={2}
+          fill="url(#gradAmber)"
+          dot={false}
+          activeDot={{ r: 5, fill: "#D97706" }}
         />
       </AreaChart>
     </ResponsiveContainer>
@@ -304,16 +352,16 @@ function AnimatedFunnelBar({ pct, color, label, delay = 0 }) {
 
 function RecoveryFunnel({ data, summary }) {
   // Build funnel from real data when available
-  const total    = summary?.total_events  || 0;
-  const failed   = summary?.failed_events || 0;
-  const retried  = Math.round(failed * 0.9);   // assume 90% retried (adjust if API provides)
+  const total = summary?.total_events || 0;
+  const failed = summary?.failed_events || 0;
+  const retried = Math.round(failed * 0.9); // assume 90% retried (adjust if API provides)
   const recovered = summary?.recovered_events || Math.round(retried * 0.75);
 
   const steps = [
-    { name: "Total Payments", value: total,     color: "#2B7FE0" },
-    { name: "Failed",         value: failed,    color: "#E53E5A" },
-    { name: "Retried",        value: retried,   color: "#D97706" },
-    { name: "Recovered",      value: recovered, color: "#00A86B" },
+    { name: "Total Payments", value: total, color: "#2B7FE0" },
+    { name: "Failed", value: failed, color: "#E53E5A" },
+    { name: "Retried", value: retried, color: "#D97706" },
+    { name: "Recovered", value: recovered, color: "#00A86B" },
   ];
 
   const max = steps[0].value || 1;
@@ -323,9 +371,9 @@ function RecoveryFunnel({ data, summary }) {
   return (
     <div className="funnel-wrap" style={{ padding: "0 8px" }}>
       {steps.map((step, i) => {
-        const pct     = Math.round((step.value / max) * 100);
+        const pct = Math.round((step.value / max) * 100);
         const prevVal = i > 0 ? steps[i - 1].value : null;
-        const drop    = prevVal ? prevVal - step.value : null;
+        const drop = prevVal ? prevVal - step.value : null;
         const dropPct = prevVal ? Math.round((drop / prevVal) * 100) : null;
 
         return (
@@ -333,7 +381,9 @@ function RecoveryFunnel({ data, summary }) {
             {i > 0 && (
               <div className="funnel-drop">
                 <div className="funnel-drop-arrow" />
-                <span>↓ {drop?.toLocaleString()} dropped ({dropPct}%)</span>
+                <span>
+                  ↓ {drop?.toLocaleString()} dropped ({dropPct}%)
+                </span>
               </div>
             )}
             <AnimatedFunnelBar
@@ -357,26 +407,54 @@ function RecoveryFunnel({ data, summary }) {
    TAB 3 — DONUT CHART (Failure Reasons)
 ───────────────────────────────────────────── */
 const READABLE_ERRORS = {
-  "generic_decline":         "Generic Decline",
-  "insufficient_funds":      "Insufficient Funds",
-  "card_expired":            "Card Expired",
-  "do_not_honor":            "Do Not Honor",
-  "authentication_required": "Auth Required",
+  generic_decline: "Generic Decline",
+  insufficient_funds: "Insufficient Funds",
+  card_expired: "Card Expired",
+  do_not_honor: "Do Not Honor",
+  authentication_required: "Auth Required",
 };
 
 function humanize(msg) {
   if (!msg) return "Unknown";
   const key = msg.toLowerCase().replace(/\s+/g, "_");
-  return READABLE_ERRORS[key] || msg.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+  return (
+    READABLE_ERRORS[key] ||
+    msg.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+  );
 }
 
 function DonutCenterLabel({ cx, cy, total }) {
   return (
-    <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle" className="donut-center-label">
-      <tspan x={cx} dy="-0.4em" style={{ fontSize: 22, fontWeight: 800, fill: "var(--text, #111827)", fontFamily: "var(--font)" }}>
+    <text
+      x={cx}
+      y={cy}
+      textAnchor="middle"
+      dominantBaseline="middle"
+      className="donut-center-label"
+    >
+      <tspan
+        x={cx}
+        dy="-0.4em"
+        style={{
+          fontSize: 22,
+          fontWeight: 800,
+          fill: "var(--text, #111827)",
+          fontFamily: "var(--font)",
+        }}
+      >
         {total}
       </tspan>
-      <tspan x={cx} dy="1.5em" style={{ fontSize: 11, fill: "var(--text-2, #5A6480)", fontFamily: "var(--font)", fontWeight: 600, letterSpacing: "0.06em" }}>
+      <tspan
+        x={cx}
+        dy="1.5em"
+        style={{
+          fontSize: 11,
+          fill: "var(--text-2, #5A6480)",
+          fontFamily: "var(--font)",
+          fontWeight: 600,
+          letterSpacing: "0.06em",
+        }}
+      >
         FAILURES
       </tspan>
     </text>
@@ -386,24 +464,34 @@ function DonutCenterLabel({ cx, cy, total }) {
 function FailureDonut({ errors = [] }) {
   const [activeIdx, setActiveIdx] = useState(null);
 
-  if (!errors.length) return <div className="ac-empty">No failure data available</div>;
+  if (!errors.length)
+    return <div className="ac-empty">No failure data available</div>;
 
   const donutData = errors.slice(0, 6).map((e, i) => ({
-    name:  humanize(e.last_error_message),
+    name: humanize(e.last_error_message),
     value: e.occurrence,
     color: ERROR_COLORS[i],
   }));
 
   const total = donutData.reduce((s, d) => s + d.value, 0);
-  const cx = 110, cy = 110;
+  const cx = 110,
+    cy = 110;
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 24, flexWrap: "wrap" }}>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 24,
+        flexWrap: "wrap",
+      }}
+    >
       <div style={{ flexShrink: 0 }}>
         <PieChart width={220} height={220}>
           <Pie
             data={donutData}
-            cx={cx} cy={cy}
+            cx={cx}
+            cy={cy}
             innerRadius={62}
             outerRadius={95}
             paddingAngle={3}
@@ -433,14 +521,23 @@ function FailureDonut({ errors = [] }) {
                   <div className="ac-tooltip-label">{d.name}</div>
                   <div className="ac-tooltip-row">
                     <span style={{ display: "flex", alignItems: "center" }}>
-                      <span className="ac-tooltip-dot" style={{ background: d.color }} />
+                      <span
+                        className="ac-tooltip-dot"
+                        style={{ background: d.color }}
+                      />
                       Occurrences
                     </span>
                     <span>{d.value}×</span>
                   </div>
-                  <div className="ac-tooltip-row" style={{ color: "var(--text-2)" }}>
+                  <div
+                    className="ac-tooltip-row"
+                    style={{ color: "var(--text-2)" }}
+                  >
                     <span style={{ display: "flex", alignItems: "center" }}>
-                      <span className="ac-tooltip-dot" style={{ background: "transparent" }} />
+                      <span
+                        className="ac-tooltip-dot"
+                        style={{ background: "transparent" }}
+                      />
                       Share
                     </span>
                     <span>{Math.round((d.value / total) * 100)}%</span>
@@ -459,9 +556,15 @@ function FailureDonut({ errors = [] }) {
             key={i}
             onMouseEnter={() => setActiveIdx(i)}
             onMouseLeave={() => setActiveIdx(null)}
-            style={{ opacity: activeIdx === null || activeIdx === i ? 1 : 0.45, transition: "opacity 0.2s" }}
+            style={{
+              opacity: activeIdx === null || activeIdx === i ? 1 : 0.45,
+              transition: "opacity 0.2s",
+            }}
           >
-            <span className="donut-legend-swatch" style={{ background: d.color }} />
+            <span
+              className="donut-legend-swatch"
+              style={{ background: d.color }}
+            />
             <span className="donut-legend-name">{d.name}</span>
             <span className="donut-legend-count">{d.value}×</span>
           </div>
@@ -475,12 +578,17 @@ function FailureDonut({ errors = [] }) {
    MAIN EXPORT
 ───────────────────────────────────────────── */
 const TABS = [
-  { id: "traffic",  label: "Traffic Flow" },
-  { id: "funnel",   label: "Recovery Funnel" },
+  { id: "traffic", label: "Traffic Flow" },
+  { id: "funnel", label: "Recovery Funnel" },
   { id: "failures", label: "Failure Breakdown" },
 ];
 
-export default function AnalyticsChart({ data = [], darkMode = false, summary = {}, topErrors = [] }) {
+export default function AnalyticsChart({
+  data = [],
+  darkMode = false,
+  summary = {},
+  topErrors = [],
+}) {
   const [activeTab, setActiveTab] = useState("traffic");
 
   return (
@@ -489,7 +597,7 @@ export default function AnalyticsChart({ data = [], darkMode = false, summary = 
 
       {/* Tab Switcher */}
       <div className="ac-tabs">
-        {TABS.map(tab => (
+        {TABS.map((tab) => (
           <button
             key={tab.id}
             className={`ac-tab ${activeTab === tab.id ? "active" : ""}`}
@@ -501,8 +609,10 @@ export default function AnalyticsChart({ data = [], darkMode = false, summary = 
       </div>
 
       {/* Chart Area */}
-      {activeTab === "traffic"  && <TrafficAreaChart data={data} />}
-      {activeTab === "funnel"   && <RecoveryFunnel data={data} summary={summary} />}
+      {activeTab === "traffic" && <TrafficAreaChart data={data} />}
+      {activeTab === "funnel" && (
+        <RecoveryFunnel data={data} summary={summary} />
+      )}
       {activeTab === "failures" && <FailureDonut errors={topErrors} />}
     </>
   );

@@ -2,17 +2,36 @@ import React, { useEffect, useState, useCallback } from "react";
 import { io } from "socket.io-client";
 import { useNavigate } from "react-router-dom";
 import {
-  Container, Form, Row, Col, Spinner, Badge,
-  ButtonGroup, Button, Card, Modal, Alert
+  Container,
+  Form,
+  Row,
+  Col,
+  Spinner,
+  Badge,
+  ButtonGroup,
+  Button,
+  Card,
+  Modal,
+  Alert,
 } from "react-bootstrap";
 import { useAuth } from "../Middleware/AuthContext";
 import TopNavbar from "../Components/TopNavbar";
 import Sidebar from "../Components/Sidebar";
 import AnalyticsChart from "../Components/AnalyticsChart";
 import {
-  ShieldCheck, Zap, TrendingUp, ArrowUpRight, Activity,
-  AlertCircle, CheckCircle2, RefreshCw, ChevronRight,
-  DollarSign, BarChart2, XCircle, Wifi
+  ShieldCheck,
+  Zap,
+  TrendingUp,
+  ArrowUpRight,
+  Activity,
+  AlertCircle,
+  CheckCircle2,
+  RefreshCw,
+  ChevronRight,
+  DollarSign,
+  BarChart2,
+  XCircle,
+  Wifi,
 } from "lucide-react";
 
 /* ─────────────────────────────────────────────
@@ -505,18 +524,34 @@ const STYLES = `
    HELPERS
 ───────────────────────────────────────────── */
 function RecoveryRing({ pct = 0, size = 72 }) {
-  const r = 28, cx = 36, cy = 36;
+  const r = 28,
+    cx = 36,
+    cy = 36;
   const circ = 2 * Math.PI * r;
   const offset = circ - (pct / 100) * circ;
   return (
     <div className="recovery-rate-ring" style={{ width: size, height: size }}>
       <svg width={size} height={size} viewBox="0 0 72 72">
-        <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--border)" strokeWidth="5" />
-        <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--green)" strokeWidth="5"
-          strokeDasharray={circ} strokeDashoffset={offset}
+        <circle
+          cx={cx}
+          cy={cy}
+          r={r}
+          fill="none"
+          stroke="var(--border)"
+          strokeWidth="5"
+        />
+        <circle
+          cx={cx}
+          cy={cy}
+          r={r}
+          fill="none"
+          stroke="var(--green)"
+          strokeWidth="5"
+          strokeDasharray={circ}
+          strokeDashoffset={offset}
           strokeLinecap="round"
           transform="rotate(-90 36 36)"
-          style={{ transition: 'stroke-dashoffset 1s ease' }}
+          style={{ transition: "stroke-dashoffset 1s ease" }}
         />
       </svg>
       <div className="recovery-rate-text">
@@ -530,9 +565,17 @@ function MetricCard({ title, val, color, icon: Icon, iconBg, delay = "" }) {
   return (
     <div className={`metric-card ${color} fade-up ${delay}`}>
       <div className="metric-icon" style={{ background: iconBg }}>
-        <Icon size={16} color={`var(--${color === 'green' ? 'green' : color === 'blue' ? 'blue' : color === 'red' ? 'red' : color === 'amber' ? 'amber' : 'purple'})`} />
+        <Icon
+          size={16}
+          color={`var(--${color === "green" ? "green" : color === "blue" ? "blue" : color === "red" ? "red" : color === "amber" ? "amber" : "purple"})`}
+        />
       </div>
-      <div className="metric-val" style={{ color: `var(--${color === 'green' ? 'green' : color === 'blue' ? 'blue' : color === 'red' ? 'red' : color === 'amber' ? 'amber' : 'purple'})` }}>
+      <div
+        className="metric-val"
+        style={{
+          color: `var(--${color === "green" ? "green" : color === "blue" ? "blue" : color === "red" ? "red" : color === "amber" ? "amber" : "purple"})`,
+        }}
+      >
         {val ?? "--"}
       </div>
       <div className="metric-title">{title}</div>
@@ -541,20 +584,38 @@ function MetricCard({ title, val, color, icon: Icon, iconBg, delay = "" }) {
 }
 
 const RCA_HINTS = {
-  "generic_decline":         { label: "Bank Decline (Generic)",     hint: "Retry after 24h — auto-handled" },
-  "insufficient_funds":      { label: "Insufficient Funds",          hint: "Schedule retry on payday cycle" },
-  "card_expired":            { label: "Card Expired",                hint: "Send card-update request to customer" },
-  "do_not_honor":            { label: "Card Blocked by Bank",        hint: "Customer must call their bank" },
-  "authentication_required": { label: "3DS Auth Required",          hint: "Redirect customer to re-authenticate" },
+  generic_decline: {
+    label: "Bank Decline (Generic)",
+    hint: "Retry after 24h — auto-handled",
+  },
+  insufficient_funds: {
+    label: "Insufficient Funds",
+    hint: "Schedule retry on payday cycle",
+  },
+  card_expired: {
+    label: "Card Expired",
+    hint: "Send card-update request to customer",
+  },
+  do_not_honor: {
+    label: "Card Blocked by Bank",
+    hint: "Customer must call their bank",
+  },
+  authentication_required: {
+    label: "3DS Auth Required",
+    hint: "Redirect customer to re-authenticate",
+  },
 };
 function humanizeError(msg) {
   if (!msg) return "Unknown Error";
-  const key = msg.toLowerCase().replace(/\s+/g,"_");
-  return RCA_HINTS[key]?.label || msg.replace(/_/g," ").replace(/\b\w/g, c => c.toUpperCase());
+  const key = msg.toLowerCase().replace(/\s+/g, "_");
+  return (
+    RCA_HINTS[key]?.label ||
+    msg.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+  );
 }
 function errorHint(msg) {
   if (!msg) return "Monitor and investigate";
-  const key = msg.toLowerCase().replace(/\s+/g,"_");
+  const key = msg.toLowerCase().replace(/\s+/g, "_");
   return RCA_HINTS[key]?.hint || "Auto-retry scheduled — no action needed";
 }
 
@@ -567,7 +628,7 @@ function Dashboard() {
 
   const [gateways, setGateways] = useState([]);
   const [selectedGateway, setSelectedGateway] = useState(
-    () => localStorage.getItem("selectedGateway") || ""
+    () => localStorage.getItem("selectedGateway") || "",
   );
   const [analytics, setAnalytics] = useState(null);
   const [isFetching, setIsFetching] = useState(false);
@@ -578,20 +639,34 @@ function Dashboard() {
   const [isCreating, setIsCreating] = useState(false);
   const [registeredUrl, setRegisteredUrl] = useState("");
   const [formData, setFormData] = useState({
-    name: "", provider_type: "stripe", webhook_secret: "",
+    name: "",
+    provider_type: "stripe",
+    webhook_secret: "", // lowercase — matches backend PROVIDERS registry
   });
-
-  const fetchAnalytics = useCallback(async (gatewayId, timeFilter, silent = false) => {
-    if (!gatewayId) return;
-    if (!silent) setIsFetching(true);
-    try {
-      const res = await API.get(`/analytics/${gatewayId}?filter=${timeFilter}`);
-      setAnalytics(res.data);
-      setIsLivePulse(true);
-      setTimeout(() => setIsLivePulse(false), 800);
-    } catch (err) { console.error(err); }
-    finally { setIsFetching(false); }
-  }, [API]);
+  const fetchAnalytics = useCallback(
+    async (gatewayId, timeFilter, silent = false) => {
+      if (!gatewayId) return;
+      if (!silent) setIsFetching(true);
+      try {
+        // Derive provider from the selected gateway object so the URL matches
+        // the backend route: /analytics/:provider/:gateway_id
+        const gateway = gateways.find((gw) => gw.id === gatewayId);
+        const provider = gateway?.provider_type?.toLowerCase();
+        if (!provider) return;
+        const res = await API.get(
+          `/analytics/${provider}/${gatewayId}?filter=${timeFilter}`,
+        );
+        setAnalytics(res.data);
+        setIsLivePulse(true);
+        setTimeout(() => setIsLivePulse(false), 800);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsFetching(false);
+      }
+    },
+    [API, gateways],
+  );
 
   const fetchGateways = useCallback(async () => {
     try {
@@ -602,7 +677,9 @@ function Dashboard() {
       const isValid = data.some((gw) => gw.id === storedId);
       if (isValid) setSelectedGateway(storedId);
       else if (data.length > 0) setSelectedGateway(data[0].id);
-    } catch (err) { console.error("Fetch Gateways Error:", err); }
+    } catch (err) {
+      console.error("Fetch Gateways Error:", err);
+    }
   }, [API]);
 
   useEffect(() => {
@@ -635,7 +712,9 @@ function Dashboard() {
       await fetchGateways();
     } catch (err) {
       alert(err.response?.data?.error || "Registration failed");
-    } finally { setIsCreating(false); }
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   if (authLoading) {
@@ -650,23 +729,66 @@ function Dashboard() {
   }
 
   // Derived values
-  const summary   = analytics?.summary || {};
-  const loss      = analytics?.loss    || {};
-  const recoveredAmt  = loss.recovered?.amount  || "$0";
-  const atRiskAmt     = loss.total_at_risk?.amount || "$0";
-  const netLossAmt    = loss.net_loss?.amount || "$0";
-  const successRate   = summary.success_rate || "0%";
-  const recoveryPct   = parseInt(successRate) || 0;
-  const gwName        = gateways.find(g => g.id === selectedGateway)?.name || "Gateway";
+  const summary = analytics?.summary || {};
+  const loss = analytics?.loss || {};
+  const recoveredAmt = loss.recovered?.amount || "$0";
+  const atRiskAmt = loss.total_at_risk?.amount || "$0";
+  const netLossAmt = loss.net_loss?.amount || "$0";
+  const successRate = summary.success_rate || "0%";
+  const recoveryPct = parseInt(successRate) || 0;
+  const gwName =
+    gateways.find((g) => g.id === selectedGateway)?.name || "Gateway";
   const showEmptyState = gateways.length === 0;
 
   const METRICS = [
-    { title: "Total Payments",     val: summary.total_events, color: "blue",   icon: BarChart2,   iconBg: "var(--blue-dim)",  delay: "stagger-1" },
-    { title: "Payment Success",    val: successRate,           color: "green",  icon: CheckCircle2,iconBg: "var(--green-dim)", delay: "stagger-2" },
-    { title: "Failed Payments",    val: summary.failed_events, color: "red",    icon: XCircle,     iconBg: "var(--red-dim)",   delay: "stagger-3" },
-    { title: "Revenue at Risk",    val: atRiskAmt,             color: "amber",  icon: AlertCircle, iconBg: "var(--amber-dim)", delay: "stagger-4" },
-    { title: "Recovered Revenue",  val: recoveredAmt,          color: "green",  icon: ShieldCheck, iconBg: "var(--green-dim)", delay: "stagger-5" },
-    { title: "Final Loss",         val: netLossAmt,            color: "red",    icon: TrendingUp,  iconBg: "var(--red-dim)",   delay: "stagger-6" },
+    {
+      title: "Total Payments",
+      val: summary.total_events,
+      color: "blue",
+      icon: BarChart2,
+      iconBg: "var(--blue-dim)",
+      delay: "stagger-1",
+    },
+    {
+      title: "Payment Success",
+      val: successRate,
+      color: "green",
+      icon: CheckCircle2,
+      iconBg: "var(--green-dim)",
+      delay: "stagger-2",
+    },
+    {
+      title: "Failed Payments",
+      val: summary.failed_events,
+      color: "red",
+      icon: XCircle,
+      iconBg: "var(--red-dim)",
+      delay: "stagger-3",
+    },
+    {
+      title: "Revenue at Risk",
+      val: atRiskAmt,
+      color: "amber",
+      icon: AlertCircle,
+      iconBg: "var(--amber-dim)",
+      delay: "stagger-4",
+    },
+    {
+      title: "Recovered Revenue",
+      val: recoveredAmt,
+      color: "green",
+      icon: ShieldCheck,
+      iconBg: "var(--green-dim)",
+      delay: "stagger-5",
+    },
+    {
+      title: "Final Loss",
+      val: netLossAmt,
+      color: "red",
+      icon: TrendingUp,
+      iconBg: "var(--red-dim)",
+      delay: "stagger-6",
+    },
   ];
 
   return (
@@ -677,33 +799,68 @@ function Dashboard() {
 
         <div className="d-flex">
           {/* Sidebar */}
-          <div style={{ width: "240px", minHeight: "calc(100vh - 60px)", flexShrink: 0 }}>
-            <Sidebar 
-  selectedGateway={selectedGateway} 
-  gateways={gateways} 
-  onSelectGateway={(id) => setSelectedGateway(id)} 
-/>
+          <div
+            style={{
+              width: "240px",
+              minHeight: "calc(100vh - 60px)",
+              flexShrink: 0,
+            }}
+          >
+            <Sidebar
+              selectedGateway={selectedGateway}
+              gateways={gateways}
+              onSelectGateway={(id) => setSelectedGateway(id)}
+            />
           </div>
 
           {/* Main */}
-          <div className="flex-grow-1 pb-5 position-relative" style={{ minWidth: 0 }}>
+          <div
+            className="flex-grow-1 pb-5 position-relative"
+            style={{ minWidth: 0 }}
+          >
             {showEmptyState && (
-              <div className="empty-overlay" style={{marginTop:"-600px"}}>
+              <div className="empty-overlay" style={{ marginTop: "-600px" }}>
                 <div className="empty-card">
-                  <div className="empty-icon"><Zap size={26} /></div>
-                  <h5 style={{ fontWeight: 800, marginBottom: 8 }}>No Gateway Connected</h5>
-                  <p style={{ fontSize: "0.88rem", color: "var(--text-2)", marginBottom: 24 }}>
-                    Connect a payment provider to start recovering failed payments automatically.
+                  <div className="empty-icon">
+                    <Zap size={26} />
+                  </div>
+                  <h5 style={{ fontWeight: 800, marginBottom: 8 }}>
+                    No Gateway Connected
+                  </h5>
+                  <p
+                    style={{
+                      fontSize: "0.88rem",
+                      color: "var(--text-2)",
+                      marginBottom: 24,
+                    }}
+                  >
+                    Connect a payment provider to start recovering failed
+                    payments automatically.
                   </p>
-                  <button className="add-gw-btn" style={{ width: "100%", padding: "12px", borderRadius: "10px", cursor: "pointer" }} onClick={() => setShowModal(true)}>
+                  <button
+                    className="add-gw-btn"
+                    style={{
+                      width: "100%",
+                      padding: "12px",
+                      borderRadius: "10px",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => setShowModal(true)}
+                  >
                     + Register Your First Gateway
                   </button>
                 </div>
               </div>
             )}
 
-            <Container fluid className="p-4" style={{ filter: showEmptyState ? "grayscale(0.8) blur(2px)" : "none", pointerEvents: showEmptyState ? "none" : "auto" }}>
-
+            <Container
+              fluid
+              className="p-4"
+              style={{
+                filter: showEmptyState ? "grayscale(0.8) blur(2px)" : "none",
+                pointerEvents: showEmptyState ? "none" : "auto",
+              }}
+            >
               {/* ── Top bar ── */}
               <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                 {/* <div className="d-flex align-items-center gap-3">
@@ -724,44 +881,103 @@ function Dashboard() {
                 </div> */}
                 <div className="d-flex gap-2 align-items-center">
                   <div className="filter-group">
-                    {["1h","24h","7d","30d"].map(t => (
-                      <button key={t} className={`filter-btn ${filter === t ? "active" : ""}`} onClick={() => setFilter(t)}>
+                    {["1h", "24h", "7d", "30d"].map((t) => (
+                      <button
+                        key={t}
+                        className={`filter-btn ${filter === t ? "active" : ""}`}
+                        onClick={() => setFilter(t)}
+                      >
                         {t.toUpperCase()}
                       </button>
                     ))}
                   </div>
-                  <button className="add-gw-btn" onClick={() => setShowModal(true)}>+ Add Gateway</button>
+                  <button
+                    className="add-gw-btn"
+                    onClick={() => setShowModal(true)}
+                  >
+                    + Add Gateway
+                  </button>
                 </div>
               </div>
-<Alert variant="info" className="mb-3">
-  🚀 We’re in beta — your account is free during early access.
-</Alert>
+              <Alert variant="info" className="mb-3">
+                🚀 We’re in beta — your account is free during early access.
+              </Alert>
               {/* ── Hero Recovery Banner ── */}
               {analytics && (
                 <div className="hero-banner fade-up mb-4">
                   <div className="d-flex align-items-center flex-wrap gap-4">
                     <div>
-                      <div className="hero-label">Revenue Recovered · {filter}</div>
+                      <div className="hero-label">
+                        Revenue Recovered · {filter}
+                      </div>
                       <div className="hero-amount">{recoveredAmt}</div>
                       <div className="hero-sub">
-                        Automatically salvaged from <strong style={{ color: "var(--text)" }}>{atRiskAmt}</strong> at-risk revenue
+                        Automatically salvaged from{" "}
+                        <strong style={{ color: "var(--text)" }}>
+                          {atRiskAmt}
+                        </strong>{" "}
+                        at-risk revenue
                       </div>
                     </div>
                     <div className="hero-divider d-none d-md-block" />
-                    <div className="d-flex align-items-center gap-16" style={{ gap: 16 }}>
+                    <div
+                      className="d-flex align-items-center gap-16"
+                      style={{ gap: 16 }}
+                    >
                       <RecoveryRing pct={recoveryPct} />
                       <div>
-                        <div style={{ fontSize: "0.75rem", color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, marginBottom: 4 }}>Recovery Rate</div>
-                        <div style={{ fontSize: "0.85rem", color: "var(--text-2)" }}>of failed payments<br />recovered automatically</div>
+                        <div
+                          style={{
+                            fontSize: "0.75rem",
+                            color: "var(--text-2)",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.08em",
+                            fontWeight: 600,
+                            marginBottom: 4,
+                          }}
+                        >
+                          Recovery Rate
+                        </div>
+                        <div
+                          style={{
+                            fontSize: "0.85rem",
+                            color: "var(--text-2)",
+                          }}
+                        >
+                          of failed payments
+                          <br />
+                          recovered automatically
+                        </div>
                       </div>
                     </div>
                     <div className="hero-divider d-none d-lg-block" />
                     <div style={{ marginLeft: "auto" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          marginBottom: 8,
+                        }}
+                      >
                         <RefreshCw size={14} color="var(--green)" />
-                        <span style={{ fontSize: "0.82rem", color: "var(--green)", fontWeight: 600 }}>Auto-Recovery is Active</span>
+                        <span
+                          style={{
+                            fontSize: "0.82rem",
+                            color: "var(--green)",
+                            fontWeight: 600,
+                          }}
+                        >
+                          Auto-Recovery is Active
+                        </span>
                       </div>
-                      <div style={{ fontSize: "0.78rem", color: "var(--text-2)" }}>No manual action needed.<br />Retries run in the background.</div>
+                      <div
+                        style={{ fontSize: "0.78rem", color: "var(--text-2)" }}
+                      >
+                        No manual action needed.
+                        <br />
+                        Retries run in the background.
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -769,8 +985,37 @@ function Dashboard() {
 
               {isFetching && !analytics && (
                 <div className="text-center py-5">
-                  <Spinner animation="grow" style={{ color: "var(--green)", width: "1rem", height: "1rem" }} />
-                  <span style={{ fontSize: "0.85rem", color: "var(--text-2)", marginLeft: 12 }}>Loading payment insights…</span>
+                  <Spinner
+                    animation="grow"
+                    style={{
+                      color: "var(--green)",
+                      width: "1rem",
+                      height: "1rem",
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontSize: "0.85rem",
+                      color: "var(--text-2)",
+                      marginLeft: 12,
+                    }}
+                  >
+                    Loading payment insights…
+                  </span>
+                  <span
+                    style={{ display: "flex", alignItems: "center", gap: 5 }}
+                  >
+                    <span
+                      style={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: "50%",
+                        background: "var(--amber)",
+                        display: "inline-block",
+                      }}
+                    />
+                    Recovered
+                  </span>
                 </div>
               )}
 
@@ -787,13 +1032,30 @@ function Dashboard() {
 
                   {/* ── Insight of the Week ── */}
                   <div className="insight-widget mb-4 fade-up stagger-3">
-                    <div className="insight-icon"><Zap size={16} /></div>
+                    <div className="insight-icon">
+                      <Zap size={16} />
+                    </div>
                     <div>
-                      <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "var(--blue)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 3 }}>
+                      <div
+                        style={{
+                          fontSize: "0.72rem",
+                          fontWeight: 700,
+                          color: "var(--blue)",
+                          letterSpacing: "0.08em",
+                          textTransform: "uppercase",
+                          marginBottom: 3,
+                        }}
+                      >
                         Weekly Insight
                       </div>
-                      <div style={{ fontSize: "0.85rem", color: "var(--text-2)" }}>
-                        <strong style={{ color: "var(--text)" }}>{recoveryPct}% of failed payments</strong> were recovered within minutes — {gwName} auto-retry is running optimally.
+                      <div
+                        style={{ fontSize: "0.85rem", color: "var(--text-2)" }}
+                      >
+                        <strong style={{ color: "var(--text)" }}>
+                          {recoveryPct}% of failed payments
+                        </strong>{" "}
+                        were recovered within minutes — {gwName} auto-retry is
+                        running optimally.
                       </div>
                     </div>
                   </div>
@@ -801,27 +1063,67 @@ function Dashboard() {
                   {/* ── Chart + Activity ── */}
                   <Row className="g-4">
                     <Col lg={8}>
-
                       {/* Chart Panel */}
                       <div className="panel mb-4 fade-up stagger-2">
                         <div className="panel-header">
-                          <div className="panel-title">Payment Traffic Flow</div>
-                          <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: "0.73rem", color: "var(--text-2)" }}>
-                            <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--green)", display: "inline-block" }} />
+                          <div className="panel-title">
+                            Payment Traffic Flow
+                          </div>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 16,
+                              fontSize: "0.73rem",
+                              color: "var(--text-2)",
+                            }}
+                          >
+                            <span
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 5,
+                              }}
+                            >
+                              <span
+                                style={{
+                                  width: 8,
+                                  height: 8,
+                                  borderRadius: "50%",
+                                  background: "var(--green)",
+                                  display: "inline-block",
+                                }}
+                              />
                               Recovered
                             </span>
-                            <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--red)", display: "inline-block" }} />
+                            <span
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 5,
+                              }}
+                            >
+                              <span
+                                style={{
+                                  width: 8,
+                                  height: 8,
+                                  borderRadius: "50%",
+                                  background: "var(--red)",
+                                  display: "inline-block",
+                                }}
+                              />
                               Failed
                             </span>
                           </div>
                         </div>
                         <div className="p-4">
-                          {(analytics.chart_data || []).some(d => d.failed > 0) && (
+                          {(analytics.chart_data || []).some(
+                            (d) => d.failed > 0,
+                          ) && (
                             <div className="chart-insight">
                               <AlertCircle size={14} />
-                              Failures detected — most recovered within minutes by auto-retry
+                              Failures detected — most recovered within minutes
+                              by auto-retry
                             </div>
                           )}
                           <AnalyticsChart
@@ -836,36 +1138,110 @@ function Dashboard() {
                       {/* RCA Panel */}
                       <div className="panel fade-up stagger-3">
                         <div className="panel-header">
-                          <div className="panel-title">Revenue Guard — Failure Analysis</div>
-                          <span style={{ fontSize: "0.72rem", color: "var(--text-2)" }}>
-                            {(analytics.top_errors ?? []).length} issue{(analytics.top_errors ?? []).length !== 1 ? "s" : ""} detected
+                          <div className="panel-title">
+                            Revenue Guard — Failure Analysis
+                          </div>
+                          <span
+                            style={{
+                              fontSize: "0.72rem",
+                              color: "var(--text-2)",
+                            }}
+                          >
+                            {(analytics.top_errors ?? []).length} issue
+                            {(analytics.top_errors ?? []).length !== 1
+                              ? "s"
+                              : ""}{" "}
+                            detected
                           </span>
                         </div>
                         {(analytics.top_errors ?? []).length > 0 ? (
-                          (analytics.top_errors).map((error, idx) => (
+                          analytics.top_errors.map((error, idx) => (
                             <div className="rca-row" key={idx}>
-                              <div style={{ width: 32, height: 32, borderRadius: 8, background: "var(--red-dim)", border: "1px solid rgba(255,77,106,0.15)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                              <div
+                                style={{
+                                  width: 32,
+                                  height: 32,
+                                  borderRadius: 8,
+                                  background: "var(--red-dim)",
+                                  border: "1px solid rgba(255,77,106,0.15)",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  flexShrink: 0,
+                                }}
+                              >
                                 <XCircle size={14} color="var(--red)" />
                               </div>
                               <div style={{ flex: 1, minWidth: 0 }}>
-                                <div style={{ fontSize: "0.88rem", fontWeight: 600, color: "var(--text)", marginBottom: 3 }}>
+                                <div
+                                  style={{
+                                    fontSize: "0.88rem",
+                                    fontWeight: 600,
+                                    color: "var(--text)",
+                                    marginBottom: 3,
+                                  }}
+                                >
                                   {humanizeError(error.last_error_message)}
                                 </div>
-                                <div className="rca-tag">✓ {errorHint(error.last_error_message)}</div>
+                                <div className="rca-tag">
+                                  ✓ {errorHint(error.last_error_message)}
+                                </div>
                               </div>
-                              <div style={{ textAlign: "right", flexShrink: 0 }}>
-                                <div className="rca-badge" style={{ background: "var(--red-dim)", color: "var(--red)", border: "1px solid rgba(255,77,106,0.2)" }}>
+                              <div
+                                style={{ textAlign: "right", flexShrink: 0 }}
+                              >
+                                <div
+                                  className="rca-badge"
+                                  style={{
+                                    background: "var(--red-dim)",
+                                    color: "var(--red)",
+                                    border: "1px solid rgba(255,77,106,0.2)",
+                                  }}
+                                >
                                   {error.occurrence}×
                                 </div>
-                                <div style={{ fontSize: "0.68rem", color: "var(--text-3)", marginTop: 4 }}>occurrences</div>
+                                <div
+                                  style={{
+                                    fontSize: "0.68rem",
+                                    color: "var(--text-3)",
+                                    marginTop: 4,
+                                  }}
+                                >
+                                  occurrences
+                                </div>
                               </div>
                             </div>
                           ))
                         ) : (
-                          <div style={{ padding: "32px 24px", textAlign: "center" }}>
-                            <CheckCircle2 size={28} color="var(--green)" style={{ marginBottom: 10 }} />
-                            <div style={{ fontSize: "0.88rem", color: "var(--green)", fontWeight: 600 }}>No Recurring Failures</div>
-                            <div style={{ fontSize: "0.78rem", color: "var(--text-2)", marginTop: 4 }}>Payment system is healthy</div>
+                          <div
+                            style={{
+                              padding: "32px 24px",
+                              textAlign: "center",
+                            }}
+                          >
+                            <CheckCircle2
+                              size={28}
+                              color="var(--green)"
+                              style={{ marginBottom: 10 }}
+                            />
+                            <div
+                              style={{
+                                fontSize: "0.88rem",
+                                color: "var(--green)",
+                                fontWeight: 600,
+                              }}
+                            >
+                              No Recurring Failures
+                            </div>
+                            <div
+                              style={{
+                                fontSize: "0.78rem",
+                                color: "var(--text-2)",
+                                marginTop: 4,
+                              }}
+                            >
+                              Payment system is healthy
+                            </div>
                           </div>
                         )}
                       </div>
@@ -873,7 +1249,10 @@ function Dashboard() {
 
                     <Col lg={4}>
                       {/* Activity Feed */}
-                      <div className="panel fade-up stagger-4" style={{ height: "100%" }}>
+                      <div
+                        className="panel fade-up stagger-4"
+                        style={{ height: "100%" }}
+                      >
                         <div className="panel-header">
                           <div className="panel-title">Last 10 Activities</div>
                           <Activity size={14} color="var(--text-2)" />
@@ -882,23 +1261,74 @@ function Dashboard() {
                           {(analytics.recent_hits ?? []).map((hit, i) => {
                             const isFailed = hit.status !== "SUCCESS";
                             return (
-                              <div className="activity-item" key={i} onClick={() => navigate(`/log_details/${hit.id}?gateway=${selectedGateway}`)}>
-                                <span className="activity-dot" style={{ background: isFailed ? "var(--red)" : "var(--green)" }} />
+                              <div
+                                className="activity-item"
+                                key={i}
+                                onClick={() =>
+                                  navigate(
+                                    `/log_details/${hit.id}?gateway=${selectedGateway}`,
+                                  )
+                                }
+                              >
+                                <span
+                                  className="activity-dot"
+                                  style={{
+                                    background: isFailed
+                                      ? "var(--red)"
+                                      : "var(--green)",
+                                  }}
+                                />
                                 <div style={{ flex: 1, minWidth: 0 }}>
-                                  <div style={{ fontSize: "0.82rem", fontWeight: 600, color: "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                  <div
+                                    style={{
+                                      fontSize: "0.82rem",
+                                      fontWeight: 600,
+                                      color: "var(--text)",
+                                      overflow: "hidden",
+                                      textOverflow: "ellipsis",
+                                      whiteSpace: "nowrap",
+                                    }}
+                                  >
                                     {hit.event_type?.split(".").pop()}
                                   </div>
-                                  <div className="activity-time">{hit.time}</div>
-                                </div>
-                                <div style={{ textAlign: "right", flexShrink: 0 }}>
-                                  <div className="activity-amount" style={{ color: isFailed ? "var(--red)" : "var(--text)" }}>
-                                    {hit.amount ? `$${parseFloat(hit.amount).toFixed(2)}` : "--"}
-                                  </div>
-                                  <div style={{ fontSize: "0.68rem", fontWeight: 700, marginTop: 2, letterSpacing: "0.06em", color: isFailed ? "var(--red)" : "var(--green)" }}>
-                                    {isFailed ? "FAILED" : "RECOVERED"}
+                                  <div className="activity-time">
+                                    {hit.time}
                                   </div>
                                 </div>
-                                <ChevronRight size={12} color="var(--text-3)" style={{ marginLeft: 4 }} />
+                                <div
+                                  style={{ textAlign: "right", flexShrink: 0 }}
+                                >
+                                  <div
+                                    className="activity-amount"
+                                    style={{
+                                      color: isFailed
+                                        ? "var(--red)"
+                                        : "var(--text)",
+                                    }}
+                                  >
+                                    {hit.amount
+                                      ? `$${parseFloat(hit.amount).toFixed(2)}`
+                                      : "--"}
+                                  </div>
+                                  <div
+                                    style={{
+                                      fontSize: "0.68rem",
+                                      fontWeight: 700,
+                                      marginTop: 2,
+                                      letterSpacing: "0.06em",
+                                      color: isFailed
+                                        ? "var(--red)"
+                                        : "var(--green)",
+                                    }}
+                                  >
+                                    {isFailed ? "FAILED" : "SUCCESS"}
+                                  </div>
+                                </div>
+                                <ChevronRight
+                                  size={12}
+                                  color="var(--text-3)"
+                                  style={{ marginLeft: 4 }}
+                                />
                               </div>
                             );
                           })}
@@ -913,7 +1343,15 @@ function Dashboard() {
         </div>
 
         {/* ── Register Modal ── */}
-        <Modal show={showModal} onHide={() => { setShowModal(false); setRegisteredUrl(""); }} centered className="db-modal">
+        <Modal
+          show={showModal}
+          onHide={() => {
+            setShowModal(false);
+            setRegisteredUrl("");
+          }}
+          centered
+          className="db-modal"
+        >
           <Modal.Header closeButton>
             <Modal.Title>Register Payment Gateway</Modal.Title>
           </Modal.Header>
@@ -922,38 +1360,123 @@ function Dashboard() {
               <form onSubmit={handleRegister}>
                 <div className="mb-3">
                   <label className="form-label">Gateway Name</label>
-                  <input type="text" className="form-control" placeholder="e.g. Stripe Production" required
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="e.g. Stripe Production"
+                    required
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                  />
                 </div>
                 <div className="mb-3">
                   <label className="form-label">Provider</label>
-                  <select className="form-select"
-                    onChange={(e) => setFormData({ ...formData, provider_type: e.target.value })}>
-                    <option value="STRIPE">Stripe</option>
-                    <option value="ADYEN">Adyen</option>
-                    <option value="PAYPAL">PayPal</option>
+                  <select
+                    className="form-select"
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        provider_type: e.target.value,
+                      })
+                    }
+                  >
+                    <option value="stripe">Stripe</option>
+                    <option value="adyen">Adyen</option>
+                    <option value="paypal">PayPal</option>
                   </select>
                 </div>
                 <div className="mb-4">
                   <label className="form-label">Webhook Signing Secret</label>
-                  <input type="password" className="form-control" placeholder="whsec_…" required
-                    onChange={(e) => setFormData({ ...formData, webhook_secret: e.target.value })} />
+                  <input
+                    type="password"
+                    className="form-control"
+                    placeholder="whsec_…"
+                    required
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        webhook_secret: e.target.value,
+                      })
+                    }
+                  />
                 </div>
-                <button className="db-modal-submit" type="submit" disabled={isCreating}>
-                  {isCreating ? <Spinner size="sm" style={{ borderColor: "rgba(0,26,14,0.3)", borderRightColor: "transparent" }} /> : "Generate Webhook URL →"}
+                <button
+                  className="db-modal-submit"
+                  type="submit"
+                  disabled={isCreating}
+                >
+                  {isCreating ? (
+                    <Spinner
+                      size="sm"
+                      style={{
+                        borderColor: "rgba(0,26,14,0.3)",
+                        borderRightColor: "transparent",
+                      }}
+                    />
+                  ) : (
+                    "Generate Webhook URL →"
+                  )}
                 </button>
               </form>
             ) : (
               <div style={{ textAlign: "center", padding: "8px 0" }}>
-                <div style={{ width: 52, height: 52, background: "var(--green-dim)", border: "1px solid var(--green-glow)", borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", color: "var(--green)" }}>
+                <div
+                  style={{
+                    width: 52,
+                    height: 52,
+                    background: "var(--green-dim)",
+                    border: "1px solid var(--green-glow)",
+                    borderRadius: 14,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    margin: "0 auto 16px",
+                    color: "var(--green)",
+                  }}
+                >
                   <CheckCircle2 size={24} />
                 </div>
-                <div style={{ fontWeight: 700, fontSize: "1rem", marginBottom: 6 }}>Gateway Registered!</div>
-                <p style={{ fontSize: "0.83rem", color: "var(--text-2)", marginBottom: 16 }}>Paste this URL in your provider's Webhook settings:</p>
-                <div style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 16px", marginBottom: 20 }}>
-                  <code style={{ fontSize: "0.78rem", color: "var(--green)", wordBreak: "break-all", fontFamily: "var(--mono)" }}>{registeredUrl}</code>
+                <div
+                  style={{ fontWeight: 700, fontSize: "1rem", marginBottom: 6 }}
+                >
+                  Gateway Registered!
                 </div>
-                <button className="db-modal-submit" onClick={() => setShowModal(false)}>Done</button>
+                <p
+                  style={{
+                    fontSize: "0.83rem",
+                    color: "var(--text-2)",
+                    marginBottom: 16,
+                  }}
+                >
+                  Paste this URL in your provider's Webhook settings:
+                </p>
+                <div
+                  style={{
+                    background: "var(--surface-2)",
+                    border: "1px solid var(--border)",
+                    borderRadius: 10,
+                    padding: "12px 16px",
+                    marginBottom: 20,
+                  }}
+                >
+                  <code
+                    style={{
+                      fontSize: "0.78rem",
+                      color: "var(--green)",
+                      wordBreak: "break-all",
+                      fontFamily: "var(--mono)",
+                    }}
+                  >
+                    {registeredUrl}
+                  </code>
+                </div>
+                <button
+                  className="db-modal-submit"
+                  onClick={() => setShowModal(false)}
+                >
+                  Done
+                </button>
               </div>
             )}
           </Modal.Body>

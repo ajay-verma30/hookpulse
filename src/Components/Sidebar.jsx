@@ -3,7 +3,7 @@ import { Nav } from "react-bootstrap";
 import { NavLink } from "react-router-dom";
 import { LayoutDashboard, BellRing, Globe } from "lucide-react";
 
-const Sidebar = ({ selectedGateway, gateways, onSelectGateway }) => {
+const Sidebar = ({ selectedGateway, gateways = [], onSelectGateway }) => {
   return (
     <div style={styles.sidebar}>
       {/* Logo Section (Optional but recommended) */}
